@@ -1,0 +1,86 @@
+@import "tailwindcss";
+@import "./styles/finance-pro.css";
+@import "./styles/mobile.css";
+
+:root {
+  color-scheme: light;
+  --finance-sidebar-width: 240px;
+  --finance-banner-height: 0px;
+  --finance-bg: #f8fafc;
+  --finance-surface: #ffffff;
+  --finance-border: #e2e8f0;
+  --finance-border-subtle: #f1f5f9;
+  --finance-text: #0f172a;
+  --finance-text-muted: #64748b;
+  --finance-text-subtle: #94a3b8;
+  --finance-primary: #0f172a;
+  --finance-primary-hover: #1e293b;
+  --finance-success: #047857;
+  --finance-warning: #b45309;
+  --finance-danger: #b91c1c;
+  --finance-info: #1d4ed8;
+}
+
+html {
+  min-width: 320px;
+  background: var(--finance-bg);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--finance-bg);
+  color: var(--finance-text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+::selection {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+main {
+  min-width: 0;
+  padding-top: calc(88px + var(--finance-banner-height, 0px));
+}
+
+@media (min-width: 1024px) {
+  main {
+    margin-left: var(--finance-sidebar-width);
+  }
+}
+
+/* Impression des états financiers (FinancialStatements.tsx) : on neutralise
+   la mise en page applicative (sidebar, marges, bandeau) pour ne garder que
+   le document lui-même, comme un vrai document imprimable. */
+@media print {
+  main {
+    padding-top: 0 !important;
+    margin-left: 0 !important;
+  }
+  @page {
+    margin: 14mm;
+  }
+}

@@ -1,0 +1,44 @@
+import { createContext, useContext, useState, type ReactNode } from 'react'
+import * as superAdminService from '../services/superAdmin'
+import type { SuperAdminAccount } from '../services/superAdmin'
+
+interface SuperAdminAuthContextValue {
+  admin: SuperAdminAccount | null
+  isAuthenticated: boolean
+  login: (email: string, password: string) => Promise<void>
+  register: (fullName: string, email: string, password: string, passwordConfirmation: string) => Promise<void>
+  logout: () => Promise<void>
+}
+
+const SuperAdminAuthContext = createContext<SuperAdminAuthContextValue | undefined>(undefined)
+
+export function SuperAdminAuthProvider({ children }: { children: ReactNode }) {
+  const [admin, setAdmin] = useState<SuperAdminAccount | null>(superAdminService.getCurrentSuperAdmin())
+
+  async function login(email: string, password: string) {
+    const account = await superAdminService.superAdminLogin(email, password)
+    setAdmin(account)
+  }
+
+  async function register(fullName: string, email: string, password: string, passwordConfirmation: string) {
+    const account = await superAdminService.registerSuperAdmin(fullName, email, password, passwordConfirmation)
+    setAdmin(account)
+  }
+
+  async function logout() {
+    await superAdminService.superAdminLogout()
+    setAdmin(null)
+  }
+
+  return (
+    <SuperAdminAuthContext.Provider value={{ admin, isAuthenticated: Boolean(admin), login, register, logout }}>
+      {children}
+    </SuperAdminAuthContext.Provider>
+  )
+}
+
+export function useSuperAdminAuth() {
+  const ctx = useContext(SuperAdminAuthContext)
+  if (!ctx) throw new Error('useSuperAdminAuth doit être utilisé à l\'intérieur de <SuperAdminAuthProvider>')
+  return ctx
+}
