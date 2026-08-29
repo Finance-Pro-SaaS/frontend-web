@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { PhoneCountryInput } from '../components/PhoneCountryInput'
 import { findCountryByName } from '../data/ohadaCountries'
-import packageJson from '../../package.json'
+//import packageJson from '../../package.json'
 
 export default function Register() {
   const { register } = useAuth()
@@ -19,7 +19,7 @@ export default function Register() {
   const [phoneDigits, setPhoneDigits] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const APP_version = packageJson.version
+  //const APP_version = packageJson.version
 
   function update(field: keyof typeof form) {
     return (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -170,9 +170,9 @@ export default function Register() {
           </Link>
         </p>
         
-        <div className="text-center text-[10px] finance-text mt-3">
+        {/*<div className="text-center text-[10px] finance-text mt-3">
             <p>Version: {APP_version}</p>
-        </div>
+        </div>*/}
       </div>
     </div>
   )
