@@ -77,7 +77,7 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-slate-50">
       <NavBar />
-      <main className="min-h-screen px-4 pb-16 pt-24 sm:px-6 lg:ml-[var(--finance-sidebar-width)] lg:px-8">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl space-y-8">
           <header>
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">MON COMPTE</p>
