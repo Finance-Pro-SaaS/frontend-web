@@ -4,6 +4,8 @@ export interface User {
   id: string
   full_name: string
   email: string
+  phone: string | null
+  preferred_currency: string | null
   status: string
 }
 
@@ -126,4 +128,36 @@ export function getCurrentUser(): User | null {
 
 export function isAuthenticated(): boolean {
   return Boolean(localStorage.getItem('ong_finance_pro_token'))
+}
+
+export async function requestPasswordResetCode(phone: string): Promise<{ message: string }> {
+  const { data } = await api.post('/auth/forgot-password', { phone })
+  return data
+}
+
+export async function resetPassword(payload: {
+  phone: string
+  code: string
+  password: string
+  password_confirmation: string
+}): Promise<{ message: string }> {
+  const { data } = await api.post('/auth/reset-password', payload)
+  return data
+}
+
+export async function updateProfile(payload: Partial<Pick<User, 'full_name' | 'email' | 'phone' | 'preferred_currency'>>): Promise<User> {
+  const { data } = await api.patch('/auth/profile', payload)
+  // Garde le localStorage synchronisé : sinon le nom/email affiché dans la
+  // barre de navigation resterait périmé jusqu'à la prochaine connexion.
+  localStorage.setItem('ong_finance_pro_user', JSON.stringify(data.data))
+  return data.data
+}
+
+export async function changePassword(payload: {
+  current_password: string
+  password: string
+  password_confirmation: string
+}): Promise<{ message: string }> {
+  const { data } = await api.post('/auth/change-password', payload)
+  return data
 }

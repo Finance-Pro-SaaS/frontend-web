@@ -14,6 +14,10 @@ interface AuthContextValue {
   register: (payload: authService.RegisterPayload) => Promise<void>
   acceptInvitation: (token: string, password: string, passwordConfirmation: string) => Promise<void>
   logout: () => Promise<void>
+  // Recharge l'utilisateur affiché (nom, email...) depuis le localStorage
+  // après une mise à jour de profil ailleurs dans l'app (page Paramètres),
+  // sans re-déclencher tout le flux de connexion.
+  refreshUser: () => void
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
@@ -50,9 +54,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
+  function refreshUser() {
+    setUser(authService.getCurrentUser())
+  }
+
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: Boolean(user), login, verifyTwoFactor, register, acceptInvitation, logout }}
+      value={{ user, isAuthenticated: Boolean(user), login, verifyTwoFactor, register, acceptInvitation, logout, refreshUser }}
     >
       {children}
     </AuthContext.Provider>

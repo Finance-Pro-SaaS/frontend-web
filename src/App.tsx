@@ -11,6 +11,9 @@ import AcceptInvitation from './pages/AcceptInvitation'
 import Dashboard from './pages/Dashboard'
 import OrganizationSettings from './pages/OrganizationSettings'
 import AccountSecurity from './pages/AccountSecurity'
+import Settings from './pages/Settings'
+import ForgotPassword from './pages/ForgotPassword'
+import ResetPassword from './pages/ResetPassword'
 import Members from './pages/Members'
 import Projects from './pages/Projects'
 import ProjectActivities from './pages/ProjectActivities'
@@ -58,10 +61,13 @@ function AppRoutes() {
     <Route path="*" element={<AuthProvider><OfflineStatus /><AccessBlockedOverlay /><Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/invitation/:token" element={<AcceptInvitation />} />
       <Route path="/" element={<ProtectedArea><Dashboard /></ProtectedArea>} />
       <Route path="/organization" element={<ProtectedArea><OrganizationSettings /></ProtectedArea>} />
       <Route path="/account/security" element={<ProtectedArea><AccountSecurity /></ProtectedArea>} />
+      <Route path="/settings" element={<ProtectedArea><Settings /></ProtectedArea>} />
       <Route path="/billing" element={<ProtectedArea><Billing /></ProtectedArea>} />
       <Route path="/members" element={<ProtectedArea><Members /></ProtectedArea>} />
       <Route path="/projects" element={<ProtectedArea><Projects /></ProtectedArea>} />
