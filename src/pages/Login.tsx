@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import packageJson from '../../package.json'
+//import packageJson from '../../package.json'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
@@ -10,7 +10,7 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const APP_version = packageJson.version
+  //const APP_version = packageJson.version
 
   // Étape 2 (uniquement si le compte a activé la double authentification)
   const [challengeToken, setChallengeToken] = useState<string | null>(null)
@@ -167,9 +167,9 @@ export default function Login() {
             Créer une organisation
           </Link>
         </p>
-        <div className="text-center text-[12px] finance-text mt-3">
+        {/*<div className="text-center text-[12px] finance-text mt-3">
             <p>Version: {APP_version}</p>
-        </div>
+        </div>*/}
       </div>
     </div>
   )
