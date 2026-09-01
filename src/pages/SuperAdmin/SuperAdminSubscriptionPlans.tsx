@@ -121,7 +121,7 @@ export default function SuperAdminSubscriptionPlans() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-center justify-between">
           <p className="text-sm text-slate-500">
             Les prix et seuils définis ici s'appliquent immédiatement à toutes les organisations : le bandeau d'alerte

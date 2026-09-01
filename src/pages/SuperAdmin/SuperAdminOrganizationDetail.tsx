@@ -120,7 +120,7 @@ export default function SuperAdminOrganizationDetail() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-6 py-8">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {error && <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
         <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">

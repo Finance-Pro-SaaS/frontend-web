@@ -44,7 +44,7 @@ export default function SuperAdminProfile() {
           <button onClick={() => navigate('/super-admin')} className="text-sm text-slate-400 hover:text-white">Retour au tableau de bord</button>
         </div>
       </header>
-      <main className="mx-auto max-w-2xl px-6 py-10">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
           <div className="mb-7"><h2 className="text-xl font-semibold text-slate-900">Informations du compte</h2><p className="mt-1 text-sm text-slate-500">Modifiez le nom, l'adresse e-mail ou le mot de passe du compte de supervision.</p></div>
           {message && <div className="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{message}</div>}
