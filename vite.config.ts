@@ -7,7 +7,13 @@ export default defineConfig({
   // Electron production loads the compiled app through file://.
   // Relative asset URLs are required so JS/CSS/service-worker files are
   // resolved from the packaged frontend-web/dist directory.
-  base: './',
+  // Chemin absolu ('/') pour le web (Vercel) — indispensable pour que les
+  // liens profonds (invitations, réinitialisation de mot de passe...)
+  // trouvent les bons fichiers JS/CSS, peu importe le chemin de l'URL
+  // depuis laquelle la page a été ouverte. Chemin relatif ('./') UNIQUEMENT
+  // pour le build desktop (Electron, chargé via file:// sans serveur, qui
+  // a besoin d'un chemin relatif pour trouver ses fichiers).
+  base: process.env.VITE_BUILD_TARGET === 'electron' ? './' : '/',
   plugins: [
     react(),
     tailwindcss(),
