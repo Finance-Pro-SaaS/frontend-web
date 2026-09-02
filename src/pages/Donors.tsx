@@ -3,7 +3,7 @@ import { NavBar } from '../components/NavBar'
 import { useOrganization } from '../context/OrganizationContext'
 import { fetchDonors, createDonor, deleteDonor, type Donor } from '../services/donors'
 
-const DONOR_TYPES = ['Aailleur_Institutionnel', 'Fondation', 'Etat', 'Particulier', 'Autre']
+const DONOR_TYPES = ['Bailleur_Institutionnel', 'Fondation', 'Etat', 'Particulier', 'Autre']
 
 export default function Donors() {
   const { currentOrganization } = useOrganization()
