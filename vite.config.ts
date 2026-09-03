@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   // Electron production loads the compiled app through file://.
   // Relative asset URLs are required so JS/CSS/service-worker files are
   // resolved from the packaged frontend-web/dist directory.
@@ -13,7 +13,7 @@ export default defineConfig({
   // depuis laquelle la page a été ouverte. Chemin relatif ('./') UNIQUEMENT
   // pour le build desktop (Electron, chargé via file:// sans serveur, qui
   // a besoin d'un chemin relatif pour trouver ses fichiers).
-  base: process.env.VITE_BUILD_TARGET === 'electron' ? './' : '/',
+  base: mode === 'electron' ? './' : '/',
   plugins: [
     react(),
     tailwindcss(),
@@ -38,10 +38,10 @@ export default defineConfig({
         theme_color: '#1e40af',
         categories: ['finance', 'business', 'productivity'],
         icons: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-          { src: '/icons/icon-maskable-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
-          { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: './icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: './icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: './icons/icon-maskable-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+          { src: './icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
@@ -59,4 +59,4 @@ export default defineConfig({
   server: {
     port: 5173,
   },
-})
+}))
