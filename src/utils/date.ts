@@ -27,20 +27,25 @@ export function formatDate(value: string | Date | null | undefined): string {
 export function formatDateTime(value: string | Date | null | undefined): string {
   if (!value) return '—'
 
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) return formatDate(value)
+
   const date = new Date(value)
 
   if (Number.isNaN(date.getTime())) return '—'
 
-  const formatted = new Intl.DateTimeFormat(DATE_LOCALE, {
+  const parts = new Intl.DateTimeFormat(DATE_LOCALE, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     timeZone: TIME_ZONE,
-  }).format(date)
+  }).formatToParts(date)
 
-  return formatted.replace(' à ', ' à ')
+  const datePart = parts.filter((part) => ['day', 'month', 'year'].includes(part.type)).map((part) => part.value).join('/')
+  const timePart = parts.filter((part) => ['hour', 'minute'].includes(part.type)).map((part) => part.value).join(':')
+
+  return `${datePart} à ${timePart}`
 }
 
 /**

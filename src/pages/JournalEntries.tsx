@@ -4,6 +4,7 @@ import { NavBar } from '../components/NavBar'
 import { useOrganization } from '../context/OrganizationContext'
 import { fetchAccounts, type Account } from '../services/accounts'
 import { fetchJournalEntries, createJournalEntry, type JournalEntry, type NewJournalEntryLine } from '../services/journalEntries'
+import { formatDateTime } from '../utils/date'
 
 const money = (value: number) => new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(value)
 
@@ -126,7 +127,7 @@ export default function JournalEntries() {
                   {entries.length === 0 && <tr><td colSpan={4} className="px-4 py-8 text-center text-sm text-slate-400">Aucune écriture manuelle pour l'instant.</td></tr>}
                   {entries.map((entry) => (
                     <tr key={entry.id} className="border-t border-slate-100">
-                      <td className="px-4 py-3 text-slate-600">{entry.entry_date}</td>
+                      <td className="px-4 py-3 text-slate-600">{formatDateTime(entry.created_at ?? entry.entry_date)}</td>
                       <td className="px-4 py-3"><span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">{entry.journal.code}</span></td>
                       <td className="px-4 py-3 text-slate-700">{entry.description}</td>
                       <td className="px-4 py-3 text-right font-medium text-slate-900">{money(entry.lines.reduce((s, l) => s + Number(l.debit), 0))}</td>

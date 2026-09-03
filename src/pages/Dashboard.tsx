@@ -16,7 +16,7 @@ import { useOrganization } from '../context/OrganizationContext'
 import { fetchProjects, type Project } from '../services/projects'
 import { fetchExpenses, type Expense } from '../services/expenses'
 import { fetchRevenues, type Revenue } from '../services/revenues'
-import { formatDate } from '../utils/date'
+import { formatDateTime } from '../utils/date'
 
 interface DashboardData {
   projects: Project[]
@@ -214,7 +214,7 @@ export default function Dashboard() {
   const recentActivity = useMemo(() => {
     const revenues = confirmedRevenues.map((item) => ({
       id: `revenue-${item.id}`,
-      date: item.received_date,
+      date: item.created_at ?? item.received_date,
       type: 'revenue' as const,
       title: item.donor?.name || 'Recette',
       description: item.project?.name || 'Recette générale',
@@ -224,7 +224,7 @@ export default function Dashboard() {
 
     const expenses = confirmedExpenses.map((item) => ({
       id: `expense-${item.id}`,
-      date: item.expense_date,
+      date: item.created_at ?? item.expense_date,
       type: 'expense' as const,
       title: item.supplier_name || 'Dépense',
       description: item.project?.name || 'Dépense générale',
@@ -392,7 +392,7 @@ export default function Dashboard() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold text-slate-700">{activity.title}</p>
-                          <p className="truncate text-xs text-slate-400">{activity.description} · {formatDate(activity.date)}</p>
+                          <p className="truncate text-xs text-slate-400">{activity.description} · {formatDateTime(activity.date)}</p>
                         </div>
                         <div className={`shrink-0 text-right text-sm font-semibold ${activity.type === 'revenue' ? 'text-emerald-700' : 'text-red-700'}`}>
                           {activity.type === 'revenue' ? '+' : '-'}{formatAmount(activity.amount, activity.currency)}

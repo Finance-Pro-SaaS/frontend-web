@@ -22,6 +22,7 @@ export interface Expense {
   bank_account?: { id: string; name: string; code: string } | null
   payment_reference: string | null
   expense_date: string
+  created_at?: string
   description: string | null
   status: ExpenseStatus
   creator?: { id: string; full_name: string }

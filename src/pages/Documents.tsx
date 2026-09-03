@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { FileText, Upload, Download, Trash2, Search, RefreshCw } from 'lucide-react' //, ArrowLeft(à jouter si le lien retour au dashbord est actif)
 import { NavBar } from '../components/NavBar'
 import { useOrganization } from '../context/OrganizationContext'
-import { formatDate } from '../utils/date'
+import { formatDateTime } from '../utils/date'
 import {
   deleteDocument,
   documentDownloadUrl,
@@ -401,7 +401,7 @@ export default function Documents() {
                         </td>
 
                         <td className="px-5 py-4 text-slate-600">
-                          {formatDate(item.created_at)}
+                          {formatDateTime(item.created_at)}
                         </td>
 
                         <td className="px-5 py-4">

@@ -11,7 +11,7 @@ export interface BankAccount {
   current_balance: string
   status: 'open' | 'closed'
 }
-export interface BankTransaction { id: string; type: 'in' | 'out'; amount: string; transaction_date: string; reference: string | null; description: string | null; project?: { id: string; name: string } | null }
+export interface BankTransaction { id: string; type: 'in' | 'out'; amount: string; transaction_date: string; created_at?: string; reference: string | null; description: string | null; project?: { id: string; name: string } | null }
 export interface BankReconciliation { id: string; reconciliation_date: string; statement_balance: string; book_balance: string; difference: string; notes: string | null }
 export type BankAccountPayload = { code: string; name: string; bank_name: string; account_number?: string | null; currency: string; opening_balance: number }
 export type BankTransactionPayload = { type: 'in' | 'out'; amount: number; transaction_date: string; reference?: string; description?: string; project_id?: string | null }

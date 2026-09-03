@@ -58,9 +58,9 @@ export default function AccountingClosure() {
   }
 
   return (
-    <div className="lg:pl-[var(--finance-sidebar-width)]">
+    <div className="min-h-screen bg-slate-50">
       <NavBar />
-      <main className="mx-auto max-w-2xl px-4 pb-16 pt-24 sm:px-6">
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-center gap-3">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-red-600"><Lock size={22} /></div>
           <div>

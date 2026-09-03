@@ -23,6 +23,7 @@ export interface CashTransaction {
   type: 'in' | 'out'
   amount: string
   transaction_date: string
+  created_at?: string
   reference: string | null
   description: string | null
   status: string

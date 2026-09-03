@@ -11,6 +11,7 @@ export interface JournalEntryLine {
 export interface JournalEntry {
   id: string
   entry_date: string
+  created_at?: string
   reference: string | null
   description: string | null
   journal: { id: number; code: string; name: string }
