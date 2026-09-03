@@ -33,6 +33,7 @@ import Balance from './pages/Balance'
 import Ledger from './pages/Ledger'
 import AccountingChartOfAccounts from './pages/AccountingChartOfAccounts'
 import JournalEntries from './pages/JournalEntries'
+import AccountingClosure from './pages/AccountingClosure'
 import Conflicts from './pages/Conflicts'
 import Billing from './pages/Billing'
 import AccessBlockedOverlay from './components/AccessBlockedOverlay'
@@ -87,6 +88,7 @@ function AppRoutes() {
       <Route path="/accounting/ledger" element={<ProtectedArea><Ledger /></ProtectedArea>} />
       <Route path="/accounting/chart-of-accounts" element={<ProtectedArea><AccountingChartOfAccounts /></ProtectedArea>} />
       <Route path="/accounting/journal-entries" element={<ProtectedArea><JournalEntries /></ProtectedArea>} />
+      <Route path="/accounting/closure" element={<ProtectedArea><AccountingClosure /></ProtectedArea>} />
       <Route path="/audit" element={<ProtectedArea><AuditLogs /></ProtectedArea>} />
       <Route path="/conflicts" element={<ProtectedArea><Conflicts /></ProtectedArea>} />
     </Routes></AuthProvider>} />
