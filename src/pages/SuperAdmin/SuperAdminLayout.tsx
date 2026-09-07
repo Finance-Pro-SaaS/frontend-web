@@ -1,6 +1,6 @@
-import { type ReactNode, useState } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, CreditCard, UserCog, LogOut, Menu, X, Bell } from 'lucide-react'
+import { type ReactNode, useState, useEffect } from 'react'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { LayoutDashboard, CreditCard, UserCog, LogOut, Menu, X, Bell, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { useSuperAdminAuth } from '../../context/SuperAdminAuthContext'
 
 type NavItem = {
@@ -10,9 +10,6 @@ type NavItem = {
   end?: boolean
 }
 
-// Liste centralisée des entrées du menu Admin : pour ajouter une page à la
-// sidebar plus tard (ex. la future page de notifications), il suffit
-// d'ajouter une ligne ici — aucune page existante n'a besoin d'être modifiée.
 const NAV_ITEMS: NavItem[] = [
   { label: 'Tableau de bord', to: '/super-admin', icon: LayoutDashboard, end: true },
   { label: "Paliers d'abonnement", to: '/super-admin/subscription-plans', icon: CreditCard },
@@ -20,37 +17,53 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Profil', to: '/super-admin/profile', icon: UserCog },
 ]
 
-/**
- * Layout commun à toutes les pages du Super Admin : sidebar fixe sur desktop
- * (navigation directe d'une page à l'autre sans repasser par le dashboard),
- * et menu à tiroir sur mobile/tablette. Remplace les en-têtes dupliqués que
- * chaque page réimplémentait avant.
- */
 export default function SuperAdminLayout({
   title,
-  children,
+  children
 }: {
   title?: string
   children: ReactNode
 }) {
   const { admin, logout } = useSuperAdminAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
+
+  // Même logique que NavBar : on met une variable CSS pour décaler le contenu
+  useEffect(() => {
+    document.documentElement.style.setProperty('--superadmin-sidebar-width', collapsed? '72px' : '256px')
+    return () => {
+      document.documentElement.style.removeProperty('--superadmin-sidebar-width')
+    }
+  }, [collapsed])
+
+  // Ferme le menu mobile quand on change de page
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname])
 
   async function handleLogout() {
     await logout()
     navigate('/super-admin/login')
   }
 
+  const initials = admin?.full_name?.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase() || 'SA'
+
   const sidebarBody = (
     <div className="flex h-full flex-col">
       <div className="border-b border-slate-800 px-6 py-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-amber-500">Espace plateforme</p>
-        <h1 className="mt-1 text-base font-semibold leading-tight text-white">
-          Super Admin
-          <br />
-          ONG Finance Pro
-        </h1>
+        {!collapsed && (
+          <>
+            <p className="text-xs font-semibold uppercase tracking-wide text-amber-500">Espace plateforme</p>
+            <h1 className="mt-2 text-base font-semibold leading-tight text-white">Super Admin</h1>
+          </>
+        )}
+        {collapsed && (
+          <div className="flex justify-center">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-xs font-bold text-slate-950">SA</span>
+          </div>
+        )}
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
@@ -60,60 +73,57 @@ export default function SuperAdminLayout({
             to={to}
             end={end}
             onClick={() => setMobileOpen(false)}
+            title={collapsed? label : undefined}
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition ${
                 isActive
-                  ? 'bg-amber-500 text-slate-950'
+                 ? 'bg-amber-500 text-slate-950'
                   : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-              }`
+              } ${collapsed? 'justify-center' : ''}`
             }
           >
             <Icon className="h-4 w-4 shrink-0" />
-            {label}
+            {!collapsed && <span className="truncate">{label}</span>}
           </NavLink>
         ))}
       </nav>
 
       <div className="border-t border-slate-800 px-3 py-4">
         <button
-          onClick={() => {
-            setMobileOpen(false)
-            navigate('/super-admin/profile')
-          }}
+          onClick={() => { setMobileOpen(false); navigate('/super-admin/profile') }}
           title={admin?.full_name}
-          className="mb-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white"
+          className={`mb-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white ${collapsed? 'justify-center' : ''}`}
         >
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-800 text-xs font-semibold text-amber-400">
-            {admin?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
+            {initials}
           </span>
-          <span className="truncate">{admin?.full_name}</span>
+          {!collapsed && <span className="truncate">{admin?.full_name}</span>}
         </button>
-
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white"
+          title={collapsed? 'Déconnexion' : undefined}
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-400 transition hover:bg-slate-800 hover:text-white ${collapsed? 'justify-center' : ''}`}
         >
           <LogOut className="h-4 w-4 shrink-0" />
-          Déconnexion
+          {!collapsed && 'Déconnexion'}
         </button>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-slate-50 lg:flex">
-      {/* Sidebar fixe (desktop) */}
-      <aside className="hidden w-64 shrink-0 bg-slate-950 lg:block">{sidebarBody}</aside>
+    <>
+      {/* Sidebar Desktop */}
+      <aside className={`fixed inset-y-0 left-0 z-50 hidden flex-col border-r border-slate-800 bg-slate-950 transition-[width] duration-200 lg:flex ${collapsed? 'w-[72px]' : 'w-64'}`}>
+        {sidebarBody}
+      </aside>
 
-      {/* Sidebar en tiroir (mobile/tablette) */}
+      {/* Sidebar Mobile */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setMobileOpen(false)} />
-          <aside className="relative z-50 h-full w-64 bg-slate-950 shadow-xl">
-            <button
-              onClick={() => setMobileOpen(false)}
-              className="absolute right-3 top-4 text-slate-400 hover:text-white"
-            >
+        <div className="fixed inset-0 z-[60] lg:hidden">
+          <button type="button" aria-label="Fermer" onClick={() => setMobileOpen(false)} className="absolute inset-0 bg-slate-950/60" />
+          <aside className="relative flex h-full w-[min(86vw,280px)] flex-col bg-slate-950">
+            <button onClick={() => setMobileOpen(false)} className="absolute right-3 top-4 text-slate-400 hover:text-white">
               <X className="h-5 w-5" />
             </button>
             {sidebarBody}
@@ -121,18 +131,25 @@ export default function SuperAdminLayout({
         </div>
       )}
 
-      <div className="min-w-0 flex-1">
-        {/* Barre du haut, uniquement visible sur mobile/tablette pour ouvrir la sidebar */}
-        <header className="flex items-center justify-between border-b border-slate-200 bg-slate-950 px-4 py-4 lg:hidden">
-          <button onClick={() => setMobileOpen(true)} className="text-slate-300 hover:text-white">
-            <Menu className="h-6 w-6" />
-          </button>
-          <h1 className="truncate text-sm font-semibold text-white">{title ?? 'Super Admin'}</h1>
-          <span className="w-6" />
-        </header>
+      {/* Header */}
+      <header className="fixed left-0 right-0 top-0 z-40 h-16 border-b border-slate-800 bg-slate-950/95 backdrop-blur lg:left-[var(--superadmin-sidebar-width)]">
+        <div className="flex h-full items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={() => setCollapsed((v) =>!v)} className="hidden h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 lg:flex">
+              {collapsed? <ChevronsRight size={18} /> : <ChevronsLeft size={18} />}
+            </button>
+            <button type="button" onClick={() => setMobileOpen(true)} className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 lg:hidden">
+              <Menu size={20} />
+            </button>
+            <h1 className="truncate text-sm font-semibold text-white">{title?? 'Super Admin'}</h1>
+          </div>
+        </div>
+      </header>
 
-        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">{children}</main>
-      </div>
-    </div>
+      {/* Contenu Principal */}
+      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          {children}
+      </main>
+    </>
   )
 }
