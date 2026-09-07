@@ -135,3 +135,39 @@ export async function reactivateOrganization(id: string) {
   const { data } = await superAdminApi.post(`/super-admin/organizations/${id}/reactivate`)
   return data.data as AdminOrganization
 }
+
+export interface PlatformNotification {
+  id: string
+  title: string
+  message: string
+  type: 'info' | 'warning' | 'success' | 'urgent'
+  is_active: boolean
+  created_at: string
+  creator?: { id: string; full_name: string } | null
+}
+
+export async function fetchPlatformNotifications() {
+  const { data } = await superAdminApi.get('/super-admin/notifications')
+  return data.data as PlatformNotification[]
+}
+
+export async function createPlatformNotification(payload: { title: string; message: string; type: PlatformNotification['type'] }) {
+  const { data } = await superAdminApi.post('/super-admin/notifications', payload)
+  return data.data as PlatformNotification
+}
+
+export async function togglePlatformNotification(id: string, is_active: boolean) {
+  const { data } = await superAdminApi.patch(`/super-admin/notifications/${id}`, { is_active })
+  return data.data as PlatformNotification
+}
+
+export async function deletePlatformNotification(id: string) {
+  await superAdminApi.delete(`/super-admin/notifications/${id}`)
+}
+
+export async function deleteOrganization(id: string, confirmName: string) {
+  const { data } = await superAdminApi.delete(`/super-admin/organizations/${id}`, {
+    data: { confirm_name: confirmName },
+  })
+  return data.message as string
+}

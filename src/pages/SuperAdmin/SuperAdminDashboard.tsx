@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useSuperAdminAuth } from '../../context/SuperAdminAuthContext'
 import { fetchDashboard, fetchOrganizations, suspendOrganization, reactivateOrganization, type AdminOrganization } from '../../services/superAdmin'
+import SuperAdminLayout from './SuperAdminLayout'
 
 type ApprovalFilter = '' | 'pending' | 'approved' | 'rejected'
 
@@ -20,7 +20,6 @@ const STATUS_COLORS: Record<AdminOrganization['approval_status'], string> = {
 const FILTERS: ApprovalFilter[] = ['', 'pending', 'approved', 'rejected']
 
 export default function SuperAdminDashboard() {
-  const { admin, logout } = useSuperAdminAuth()
   const navigate = useNavigate()
 
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchDashboard>> | null>(null)
@@ -57,11 +56,6 @@ export default function SuperAdminDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter])
 
-  async function handleLogout() {
-    await logout()
-    navigate('/super-admin/login')
-  }
-
   async function runAction(id: string, action: () => Promise<AdminOrganization>) {
     setBusyId(id)
     setError(null)
@@ -83,38 +77,7 @@ export default function SuperAdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-slate-950 px-6 py-4">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-6">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-500">Espace plateforme</p>
-            <h1 className="text-lg font-semibold text-white">Super Admin — ONG Finance Pro</h1>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => navigate('/super-admin/subscription-plans')}
-              className="text-sm font-medium text-slate-300 transition hover:text-white"
-            >
-              Paliers d'abonnement
-            </button>
-            <button
-              onClick={() => navigate('/super-admin/profile')}
-              className="text-sm font-medium text-slate-300 transition hover:text-white"
-            >
-              {admin?.full_name}
-            </button>
-            <button
-              onClick={handleLogout}
-              className="text-sm text-slate-400 transition hover:text-white"
-            >
-              Déconnexion
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <SuperAdminLayout title="Tableau de bord">
         {error && (
           <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {error}
@@ -270,8 +233,7 @@ export default function SuperAdminDashboard() {
             )}
           </div>
         </section>
-      </main>
-    </div>
+    </SuperAdminLayout>
   )
 }
 

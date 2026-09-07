@@ -1,5 +1,4 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
   fetchSubscriptionPlans,
   createSubscriptionPlan,
@@ -8,6 +7,7 @@ import {
   type AdminSubscriptionPlan,
   type SubscriptionPlanInput,
 } from '../../services/subscriptionPlansAdmin'
+import SuperAdminLayout from './SuperAdminLayout'
 
 const inputClass = 'w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-slate-500 focus:outline-none'
 
@@ -28,7 +28,6 @@ const EMPTY_FORM: FormState = {
 }
 
 export default function SuperAdminSubscriptionPlans() {
-  const navigate = useNavigate()
   const [plans, setPlans] = useState<AdminSubscriptionPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -110,18 +109,7 @@ export default function SuperAdminSubscriptionPlans() {
   const limitLabel = (value: number | null) => (value === null ? 'Illimité' : value)
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-slate-950 px-6 py-4">
-        <div className="mx-auto flex max-w-5xl items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-amber-500">Espace plateforme</p>
-            <h1 className="text-lg font-semibold text-white">Paliers d'abonnement</h1>
-          </div>
-          <button onClick={() => navigate('/super-admin')} className="text-sm text-slate-400 hover:text-white">Retour au tableau de bord</button>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <SuperAdminLayout title="Paliers d'abonnement">
         <div className="mb-6 flex items-center justify-between">
           <p className="text-sm text-slate-500">
             Les prix et seuils définis ici s'appliquent immédiatement à toutes les organisations : le bandeau d'alerte
@@ -224,7 +212,6 @@ export default function SuperAdminSubscriptionPlans() {
             </table>
           )}
         </div>
-      </main>
-    </div>
+    </SuperAdminLayout>
   )
 }

@@ -45,6 +45,7 @@ import SuperAdminDashboard from './pages/SuperAdmin/SuperAdminDashboard'
 import SuperAdminProfile from './pages/SuperAdmin/SuperAdminProfile'
 import SuperAdminOrganizationDetail from './pages/SuperAdmin/SuperAdminOrganizationDetail'
 import SuperAdminSubscriptionPlans from './pages/SuperAdmin/SuperAdminSubscriptionPlans'
+import SuperAdminNotifications from './pages/SuperAdmin/SuperAdminNotifications'
 
 function ProtectedArea({ children }: { children: React.ReactNode }) {
   return <RequireAuth><OrganizationProvider>{children}</OrganizationProvider></RequireAuth>
@@ -58,6 +59,7 @@ function AppRoutes() {
     <Route path="/super-admin/profile" element={<SuperAdminAuthProvider><RequireSuperAdmin><SuperAdminProfile /></RequireSuperAdmin></SuperAdminAuthProvider>} />
     <Route path="/super-admin/organizations/:id" element={<SuperAdminAuthProvider><RequireSuperAdmin><SuperAdminOrganizationDetail /></RequireSuperAdmin></SuperAdminAuthProvider>} />
     <Route path="/super-admin/subscription-plans" element={<SuperAdminAuthProvider><RequireSuperAdmin><SuperAdminSubscriptionPlans /></RequireSuperAdmin></SuperAdminAuthProvider>} />
+    <Route path="/super-admin/notifications" element={<SuperAdminAuthProvider><RequireSuperAdmin><SuperAdminNotifications /></RequireSuperAdmin></SuperAdminAuthProvider>} />
 
     <Route path="*" element={<AuthProvider><OfflineStatus /><AccessBlockedOverlay /><Routes>
       <Route path="/login" element={<Login />} />

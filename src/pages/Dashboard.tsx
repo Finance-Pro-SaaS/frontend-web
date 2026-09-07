@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { NavBar } from '../components/NavBar'
+import { NotificationsBanner } from '../components/NotificationsBanner'
 import { useAuth } from '../context/AuthContext'
 import { useOrganization } from '../context/OrganizationContext'
 import { fetchProjects, type Project } from '../services/projects'
@@ -263,6 +264,8 @@ export default function Dashboard() {
               Actualiser
             </button>
           </div>
+
+          <NotificationsBanner />
 
           {error && (
             <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

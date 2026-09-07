@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCurrentSuperAdmin, updateSuperAdminProfile, type SuperAdminAccount } from '../../services/superAdmin'
+import SuperAdminLayout from './SuperAdminLayout'
 
 export default function SuperAdminProfile() {
   const navigate = useNavigate()
@@ -37,14 +38,7 @@ export default function SuperAdminProfile() {
   if (!admin) return null
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-slate-950 px-6 py-4">
-        <div className="mx-auto flex max-w-4xl items-center justify-between">
-          <div><p className="text-xs font-semibold uppercase tracking-wide text-amber-500">Espace plateforme</p><h1 className="text-lg font-semibold text-white">Profil Super Admin</h1></div>
-          <button onClick={() => navigate('/super-admin')} className="text-sm text-slate-400 hover:text-white">Retour au tableau de bord</button>
-        </div>
-      </header>
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <SuperAdminLayout title="Profil Super Admin">
         <div className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm">
           <div className="mb-7"><h2 className="text-xl font-semibold text-slate-900">Informations du compte</h2><p className="mt-1 text-sm text-slate-500">Modifiez le nom, l'adresse e-mail ou le mot de passe du compte de supervision.</p></div>
           {message && <div className="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">{message}</div>}
@@ -56,8 +50,7 @@ export default function SuperAdminProfile() {
             <div className="flex justify-end gap-3 pt-2"><button type="button" onClick={() => navigate('/super-admin')} className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700">Annuler</button><button type="submit" disabled={loading} className="rounded-lg bg-slate-950 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50">{loading ? 'Enregistrement...' : 'Enregistrer les modifications'}</button></div>
           </form>
         </div>
-      </main>
-    </div>
+    </SuperAdminLayout>
   )
 }
 

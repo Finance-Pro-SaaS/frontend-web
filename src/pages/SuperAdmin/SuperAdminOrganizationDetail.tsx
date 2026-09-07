@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Building2, CalendarDays, CheckCircle2, FileText, Globe2, Mail, MapPin, Phone, ReceiptText, UserRound, XCircle } from 'lucide-react'
-import { approveOrganization, fetchOrganization, rejectOrganization, type AdminOrganizationDetail } from '../../services/superAdmin'
+import { ArrowLeft, Building2, CalendarDays, CheckCircle2, FileText, Globe2, Mail, MapPin, Phone, ReceiptText, Trash2, UserRound, XCircle } from 'lucide-react'
+import { approveOrganization, deleteOrganization, fetchOrganization, rejectOrganization, type AdminOrganizationDetail } from '../../services/superAdmin'
+import SuperAdminLayout from './SuperAdminLayout'
 
 const statusLabel: Record<AdminOrganizationDetail['approval_status'], string> = {
   pending: 'En attente',
@@ -46,6 +47,10 @@ export default function SuperAdminOrganizationDetail() {
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [confirmInput, setConfirmInput] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   async function load() {
     if (!id) return
@@ -98,29 +103,38 @@ export default function SuperAdminOrganizationDetail() {
     }
   }
 
+  async function handleDelete() {
+    if (!id || !organization) return
+    if (confirmInput !== organization.name) return
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      await deleteOrganization(id, confirmInput)
+      navigate('/super-admin')
+    } catch (err: any) {
+      setDeleteError(err.response?.data?.message ?? 'Impossible de supprimer cette organisation.')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   if (loading) {
-    return <div className="min-h-screen bg-slate-50 p-6"><div className="mx-auto max-w-6xl rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-500">Chargement du profil de l'organisation…</div></div>
+    return <SuperAdminLayout title="Profil de l'organisation"><div className="rounded-2xl border border-slate-200 bg-white p-8 text-sm text-slate-500">Chargement du profil de l'organisation…</div></SuperAdminLayout>
   }
 
   if (!organization) {
-    return <div className="min-h-screen bg-slate-50 p-6"><div className="mx-auto max-w-3xl rounded-2xl border border-red-200 bg-white p-8"><p className="text-sm text-red-600">{error ?? 'Organisation introuvable.'}</p><button onClick={() => navigate('/super-admin')} className="mt-5 text-sm font-semibold text-slate-700 hover:underline">Retour aux organisations</button></div></div>
+    return <SuperAdminLayout title="Profil de l'organisation"><div className="mx-auto max-w-3xl rounded-2xl border border-red-200 bg-white p-8"><p className="text-sm text-red-600">{error ?? 'Organisation introuvable.'}</p><button onClick={() => navigate('/super-admin')} className="mt-5 text-sm font-semibold text-slate-700 hover:underline">Retour aux organisations</button></div></SuperAdminLayout>
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-slate-950 px-6 py-4">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-500">Espace plateforme</p>
-            <h1 className="mt-1 text-lg font-semibold text-white">Profil de l'organisation</h1>
-          </div>
-          <button onClick={() => navigate('/super-admin')} className="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800">
+    <SuperAdminLayout title="Profil de l'organisation">
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold text-slate-900">Profil de l'organisation</h2>
+          <button onClick={() => navigate('/super-admin')} className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
             <ArrowLeft className="h-4 w-4" /> Organisations
           </button>
         </div>
-      </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {error && <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</div>}
 
         <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -208,7 +222,73 @@ export default function SuperAdminOrganizationDetail() {
             </aside>
           </div>
         </section>
-      </main>
-    </div>
+
+        <section className="mt-6 rounded-2xl border border-red-200 bg-red-50/40 p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="font-semibold text-red-800">Zone dangereuse</h3>
+              <p className="mt-1 text-sm text-red-700">
+                Supprime définitivement cette organisation ainsi que toutes ses données (projets, dépenses, recettes,
+                comptes bancaires, factures, écritures comptables...). Cette action est irréversible.
+              </p>
+            </div>
+            <button
+              onClick={() => { setDeleteError(null); setConfirmInput(''); setDeleteModalOpen(true) }}
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2.5 text-sm font-semibold text-red-700 hover:bg-red-100"
+            >
+              <Trash2 className="h-4 w-4" /> Supprimer l'organisation
+            </button>
+          </div>
+        </section>
+
+        {deleteModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100">
+                  <Trash2 className="h-5 w-5 text-red-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900">Supprimer « {organization.name} » ?</h3>
+              </div>
+
+              <p className="text-sm text-slate-600">
+                Cette action supprimera définitivement l'organisation et toutes ses données associées. Elle est
+                irréversible. Pour confirmer, tapez le nom exact de l'organisation ci-dessous :
+              </p>
+
+              <p className="mt-3 rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-800">
+                {organization.name}
+              </p>
+
+              <input
+                value={confirmInput}
+                onChange={(e) => setConfirmInput(e.target.value)}
+                placeholder="Nom de l'organisation"
+                className="mt-3 w-full rounded-lg border border-slate-300 px-3.5 py-2.5 text-sm text-slate-900 outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                autoFocus
+              />
+
+              {deleteError && <p className="mt-3 text-sm text-red-600">{deleteError}</p>}
+
+              <div className="mt-6 flex justify-end gap-3">
+                <button
+                  onClick={() => setDeleteModalOpen(false)}
+                  disabled={deleting}
+                  className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting || confirmInput !== organization.name}
+                  className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {deleting ? 'Suppression...' : 'Supprimer définitivement'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+    </SuperAdminLayout>
   )
 }
