@@ -95,7 +95,7 @@ export default function Register() {
               value={form.organization_name}
               onChange={update('organization_name')}
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
-              placeholder="ONG Espoir Bénin"
+              placeholder="ONG DEMO REVEILLE"
             />
           </div>
 
@@ -107,6 +107,7 @@ export default function Register() {
                 value={form.full_name}
                 onChange={update('full_name')}
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+                placeholder="Jean Dupont"
               />
             </div>
             <div>
