@@ -38,7 +38,7 @@ export default function FinancialStatements() {
           <div>
             <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-400">Rapports</div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">États financiers SYSCOHADA</h1>
-            <p className="mt-1 text-sm text-slate-500">Compte de Résultat et Bilan de Trésorerie \u2014 Système Minimal de Trésorerie.</p>
+            <p className="mt-1 text-sm text-slate-500">Compte de Résultat et Bilan de Trésorerie — Système Minimal de Trésorerie.</p>
           </div>
           <div className="flex flex-wrap items-end gap-2 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
             <label className="text-xs font-medium text-slate-500">Du<input type="date" value={from} onChange={e => setFrom(e.target.value)} className="mt-1 block rounded-lg border border-slate-200 px-2.5 py-2 text-sm"/></label>
@@ -59,7 +59,7 @@ export default function FinancialStatements() {
             <div className="mb-8 border-b border-slate-200 pb-6 text-center">
               <h2 className="text-lg font-bold uppercase tracking-wide text-slate-900">{statement.organization.name}</h2>
               <p className="text-xs text-slate-500">{statement.organization.country}</p>
-              <p className="mt-3 text-sm font-semibold text-slate-700">États financiers \u2014 Système Minimal de Trésorerie (SYSCOHADA)</p>
+              <p className="mt-3 text-sm font-semibold text-slate-700">États financiers — Système Minimal de Trésorerie (SYSCOHADA)</p>
               <p className="text-xs text-slate-500">Période du {formatDate(statement.period.from)} au {formatDate(statement.period.to)}</p>
             </div>
 
