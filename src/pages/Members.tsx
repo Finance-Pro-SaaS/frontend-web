@@ -113,7 +113,7 @@ export default function Members() {
               Membre ajouté — partagez ce lien pour qu'il puisse activer son compte
             </p>
             <p className="text-xs text-blue-700 mb-2">
-              Aucun e-mail n'est envoyé automatiquement pour l'instant : copiez ce lien et
+              Si aucun e-mail n'est envoyé automatiquement : copiez ce lien et
               transmettez-le vous-même (SMS, WhatsApp...). Il expire dans 7 jours.
             </p>
             <div className="flex items-center gap-2">
