@@ -13,6 +13,8 @@ import {
 import { NavBar } from '../components/NavBar'
 import { NotificationsBanner } from '../components/NotificationsBanner'
 import { FinancialChart } from '../components/FinancialChart'
+import { ExpenseBreakdown } from '../components/ExpenseBreakdown'
+import { Sparkline, TrendBadge } from '../components/Sparkline'
 import { useAuth } from '../context/AuthContext'
 import { useOrganization } from '../context/OrganizationContext'
 import { fetchProjects, type Project } from '../services/projects'
@@ -43,18 +45,34 @@ function getFirstName(fullName: string | undefined) {
   return fullName?.trim().split(/\s+/)[0] || 'Administrateur'
 }
 
+// Le mois en cours est incomplet : on compare les deux derniers mois complets.
+function trendOf(values: number[], labels: string[]) {
+  const last = values.length - 2
+  return {
+    current: values[last] ?? 0,
+    previous: values[last - 1] ?? 0,
+    label: `${labels[last]} vs ${labels[last - 1]}`,
+  }
+}
+
 function StatCard({
   label,
   value,
   description,
   icon: Icon,
   tone,
+  series,
+  trend,
+  color,
 }: {
   label: string
   value: string
   description: string
   icon: LucideIcon
   tone: 'dark' | 'green' | 'red' | 'blue'
+  series?: number[]
+  trend?: { current: number; previous: number; inverse?: boolean; label?: string }
+  color?: string
 }) {
   const toneClasses = {
     dark: 'bg-slate-900 text-white',
@@ -65,10 +83,20 @@ function StatCard({
 
   return (
     <div className="fp-stat-card">
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="fp-stat-label">{label}</div>
-        <div className="fp-stat-value truncate">{value}</div>
+        <div className="fp-stat-value truncate" title={value} style={{ fontSize: 'clamp(1.15rem, 1.6vw, 1.5rem)' }}>{value}</div>
         <div className="mt-1 text-xs text-slate-400">{description}</div>
+        {trend && (
+          <div className="mt-2">
+            <TrendBadge current={trend.current} previous={trend.previous} inverse={trend.inverse} label={trend.label} />
+          </div>
+        )}
+        {series && color && (
+          <div className="mt-2">
+            <Sparkline values={series} color={color} />
+          </div>
+        )}
       </div>
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${toneClasses[tone]}`}>
         <Icon size={19} strokeWidth={2} />
@@ -145,6 +173,46 @@ export default function Dashboard() {
     }
   }, [currency, confirmedRevenues, confirmedExpenses, data.projects])
 
+  // Séries des 6 derniers mois pour les mini-courbes et tendances des cartes.
+  const monthlySeries = useMemo(() => {
+    const now = new Date()
+    const keys = Array.from({ length: 6 }, (_, index) => {
+      const date = new Date(now.getFullYear(), now.getMonth() - (5 - index), 1)
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    })
+    const revenues = keys.map(() => 0)
+    const expenses = keys.map(() => 0)
+
+    confirmedRevenues
+      .filter((item) => item.currency === currency)
+      .forEach((item) => {
+        const index = keys.indexOf(item.received_date.slice(0, 7))
+        if (index >= 0) revenues[index] += Number(item.amount)
+      })
+
+    confirmedExpenses
+      .filter((item) => item.currency === currency)
+      .forEach((item) => {
+        const index = keys.indexOf(item.expense_date.slice(0, 7))
+        if (index >= 0) expenses[index] += Number(item.amount)
+      })
+
+    const labels = keys.map((_, index) => {
+      const date = new Date(now.getFullYear(), now.getMonth() - (5 - index), 1)
+      const short = new Intl.DateTimeFormat('fr-FR', { month: 'short' }).format(date).replace('.', '')
+      return short.charAt(0).toUpperCase() + short.slice(1)
+    })
+
+    return { revenues, expenses, balance: revenues.map((value, index) => value - expenses[index]), labels }
+  }, [currency, confirmedRevenues, confirmedExpenses])
+
+  const otherCurrencyCount = useMemo(
+    () =>
+      confirmedRevenues.filter((item) => item.currency !== currency).length +
+      confirmedExpenses.filter((item) => item.currency !== currency).length,
+    [currency, confirmedRevenues, confirmedExpenses]
+  )
+
   const projectSummary = useMemo(() => {
     return data.projects
       .map((project) => {
@@ -152,9 +220,9 @@ export default function Dashboard() {
         const spent = confirmedExpenses
           .filter((expense) => expense.project_id === project.id && expense.currency === project.currency)
           .reduce((sum, expense) => sum + Number(expense.amount), 0)
-        const percentage = budget > 0 ? Math.min(100, (spent / budget) * 100) : 0
+        const rawPercentage = budget > 0 ? (spent / budget) * 100 : 0
 
-        return { project, budget, spent, percentage }
+        return { project, budget, spent, rawPercentage, percentage: Math.min(100, rawPercentage) }
       })
       .sort((a, b) => b.budget - a.budget)
       .slice(0, 5)
@@ -236,15 +304,25 @@ export default function Dashboard() {
             </div>
           ) : (
             <>
+              {otherCurrencyCount > 0 && (
+                <div className="mb-4 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  <CircleAlert size={18} className="mt-0.5 shrink-0" />
+                  <p>
+                    {otherCurrencyCount} opération{otherCurrencyCount > 1 ? 's' : ''} confirmée{otherCurrencyCount > 1 ? 's' : ''} dans une autre devise que {currency}
+                    {otherCurrencyCount > 1 ? ' ne sont' : ' n’est'} pas incluse{otherCurrencyCount > 1 ? 's' : ''} dans ces totaux.
+                  </p>
+                </div>
+              )}
+
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard label="Recettes" value={formatAmount(totals.revenues, currency)} description="Total enregistré" icon={ArrowUpRight} tone="green" />
-                <StatCard label="Dépenses" value={formatAmount(totals.expenses, currency)} description="Total enregistré" icon={ArrowDownRight} tone="red" />
-                <StatCard label="Solde" value={formatAmount(totals.balance, currency)} description="Recettes moins dépenses" icon={WalletCards} tone="dark" />
+                <StatCard label="Recettes" value={formatAmount(totals.revenues, currency)} description="Total enregistré" icon={ArrowUpRight} tone="green" series={monthlySeries.revenues} trend={trendOf(monthlySeries.revenues, monthlySeries.labels)} color="#10b981" />
+                <StatCard label="Dépenses" value={formatAmount(totals.expenses, currency)} description="Total enregistré" icon={ArrowDownRight} tone="red" series={monthlySeries.expenses} trend={{ ...trendOf(monthlySeries.expenses, monthlySeries.labels), inverse: true }} color="#ef4444" />
+                <StatCard label="Solde" value={formatAmount(totals.balance, currency)} description="Recettes moins dépenses" icon={WalletCards} tone="dark" series={monthlySeries.balance} trend={trendOf(monthlySeries.balance, monthlySeries.labels)} color="#0f172a" />
                 <StatCard label="Projets actifs" value={numberFormatter.format(totals.activeProjects)} description={`${data.projects.length} projet${data.projects.length > 1 ? 's' : ''} au total`} icon={FolderKanban} tone="blue" />
               </div>
 
-              <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(320px,1fr)]">
-                <section className="fp-card">
+              <div className="mt-6 grid gap-6 xl:grid-cols-2">
+                <section className="fp-card xl:col-span-2">
                   <div className="fp-card-header">
                     <div>
                       <h2 className="fp-card-title">Évolution financière</h2>
@@ -259,8 +337,20 @@ export default function Dashboard() {
                 <section className="fp-card">
                   <div className="fp-card-header">
                     <div>
+                      <h2 className="fp-card-title">Répartition des dépenses</h2>
+                      <p className="fp-card-description">Par projet · dépenses confirmées · {currency}</p>
+                    </div>
+                  </div>
+                  <div className="fp-card-body">
+                    <ExpenseBreakdown expenses={confirmedExpenses} currency={currency} />
+                  </div>
+                </section>
+
+                <section className="fp-card">
+                  <div className="fp-card-header">
+                    <div>
                       <h2 className="fp-card-title">Suivi des projets</h2>
-                      <p className="fp-card-description">Budget consommé par projet</p>
+                      <p className="fp-card-description">Budget consommé · alerte dès 80 %, dépassement au-delà de 100 %</p>
                     </div>
                     <Link to="/projects" className="text-xs font-semibold text-slate-600 hover:text-slate-900">Voir tout</Link>
                   </div>
@@ -273,24 +363,29 @@ export default function Dashboard() {
                       </div>
                     ) : (
                       <div className="space-y-5">
-                        {projectSummary.map(({ project, budget, spent, percentage }) => (
+                        {projectSummary.map(({ project, budget, spent, rawPercentage, percentage }) => {
+                          const barColor = rawPercentage >= 100 ? 'bg-red-500' : rawPercentage >= 80 ? 'bg-amber-500' : 'bg-slate-800'
+                          const textColor = rawPercentage >= 100 ? 'text-red-600' : rawPercentage >= 80 ? 'text-amber-600' : 'text-slate-600'
+
+                          return (
                           <div key={project.id}>
                             <div className="flex items-center justify-between gap-3">
                               <div className="min-w-0">
                                 <p className="truncate text-sm font-semibold text-slate-700">{project.name}</p>
                                 <p className="mt-0.5 text-[11px] text-slate-400">{STATUS_LABELS[project.status]}</p>
                               </div>
-                              <span className="shrink-0 text-xs font-semibold text-slate-600">{percentage.toFixed(0)}%</span>
+                              <span className={`shrink-0 text-xs font-semibold ${textColor}`}>{rawPercentage.toFixed(0)}%</span>
                             </div>
                             <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                              <div className="h-full rounded-full bg-slate-800 transition-all" style={{ width: `${percentage}%` }} />
+                              <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${percentage}%` }} />
                             </div>
                             <div className="mt-1.5 flex justify-between text-[11px] text-slate-400">
                               <span>{formatAmount(spent, project.currency)}</span>
                               <span>{formatAmount(budget, project.currency)}</span>
                             </div>
                           </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     )}
                   </div>

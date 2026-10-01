@@ -87,19 +87,17 @@ function buildMonths(count: number): ChartPoint[] {
   return months
 }
 
-function ChartTooltip({
-  active,
-  payload,
-  currency,
-  mode,
-}: {
+// Type local : compatible avec Recharts 2.x et 3.x (TooltipProps a changé en 3.x).
+interface ChartTooltipProps {
   active?: boolean
-  payload?: Array<{ payload: ChartPoint }>
+  payload?: ReadonlyArray<{ payload?: unknown }>
   currency: string
   mode: Mode
-}) {
+}
+
+function ChartTooltip({ active, payload, currency, mode }: ChartTooltipProps) {
   if (!active || !payload?.length) return null
-  const point = payload[0]?.payload as ChartPoint | undefined
+  const point = payload[0].payload as ChartPoint | undefined
   if (!point) return null
 
   const rows =
@@ -158,8 +156,20 @@ function ToggleGroup<T extends string | number>({
   )
 }
 
-function Trend({ current, previous, inverse = false }: { current: number; previous: number; inverse?: boolean }) {
-  if (previous === 0) return <span className="text-[11px] text-slate-400">vs mois précédent : —</span>
+function Trend({
+  current,
+  previous,
+  label,
+  inverse = false,
+}: {
+  current: number
+  previous: number
+  label: string
+  inverse?: boolean
+}) {
+  if (previous === 0) {
+    return <span className="text-[11px] text-slate-400">{label} : {current > 0 ? 'nouveau' : '—'}</span>
+  }
 
   const change = ((current - previous) / Math.abs(previous)) * 100
   const isUp = change >= 0
@@ -170,7 +180,7 @@ function Trend({ current, previous, inverse = false }: { current: number; previo
     <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${isGood ? 'text-emerald-600' : 'text-red-600'}`}>
       <Icon size={12} />
       {isUp ? '+' : ''}
-      {change.toFixed(0)}% <span className="font-normal text-slate-400">vs mois précédent</span>
+      {change.toFixed(0)}% <span className="font-normal text-slate-400">{label}</span>
     </span>
   )
 }
@@ -221,7 +231,10 @@ export function FinancialChart({ revenues, expenses, currency }: FinancialChartP
   }, [data])
 
   const last = data[data.length - 1]
-  const previous = data[data.length - 2]
+  // Le mois en cours est incomplet : la tendance compare les deux derniers mois complets.
+  const lastComplete = data[data.length - 2]
+  const beforeLast = data[data.length - 3]
+  const trendLabel = `${lastComplete.label} vs ${beforeLast.label}`
   const hasData = data.some((point) => point.revenues > 0 || point.expenses > 0 || point.cumulative !== 0)
 
   return (
@@ -251,14 +264,14 @@ export function FinancialChart({ revenues, expenses, currency }: FinancialChartP
             <ArrowUpRight size={13} className="text-emerald-500" /> Recettes ({period} mois)
           </div>
           <p className="mt-1 truncate text-base font-bold text-slate-800">{formatAmount(totals.revenues, currency)}</p>
-          <Trend current={last.revenues} previous={previous?.revenues ?? 0} />
+          <Trend current={lastComplete.revenues} previous={beforeLast.revenues} label={trendLabel} />
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
           <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-400">
             <ArrowDownRight size={13} className="text-red-500" /> Dépenses ({period} mois)
           </div>
           <p className="mt-1 truncate text-base font-bold text-slate-800">{formatAmount(totals.expenses, currency)}</p>
-          <Trend current={last.expenses} previous={previous?.expenses ?? 0} inverse />
+          <Trend current={lastComplete.expenses} previous={beforeLast.expenses} label={trendLabel} inverse />
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
           <div className="text-[11px] font-medium uppercase tracking-wide text-slate-400">Solde de la période</div>
