@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { NavBar } from '../components/NavBar'
 import { NotificationsBanner } from '../components/NotificationsBanner'
+import { FinancialChart } from '../components/FinancialChart'
 import { useAuth } from '../context/AuthContext'
 import { useOrganization } from '../context/OrganizationContext'
 import { fetchProjects, type Project } from '../services/projects'
@@ -23,13 +24,6 @@ interface DashboardData {
   projects: Project[]
   expenses: Expense[]
   revenues: Revenue[]
-}
-
-interface MonthPoint {
-  key: string
-  label: string
-  revenues: number
-  expenses: number
 }
 
 const STATUS_LABELS: Record<Project['status'], string> = {
@@ -47,29 +41,6 @@ function formatAmount(value: number, currency: string) {
 
 function getFirstName(fullName: string | undefined) {
   return fullName?.trim().split(/\s+/)[0] || 'Administrateur'
-}
-
-function getMonthKey(date: string) {
-  return date.slice(0, 7)
-}
-
-function getLastMonths(count: number): MonthPoint[] {
-  const now = new Date()
-  const months: MonthPoint[] = []
-
-  for (let offset = count - 1; offset >= 0; offset -= 1) {
-    const date = new Date(now.getFullYear(), now.getMonth() - offset, 1)
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-    const label = new Intl.DateTimeFormat('fr-FR', { month: 'short' }).format(date).replace('.', '')
-    months.push({
-      key,
-      label: label.charAt(0).toUpperCase() + label.slice(1),
-      revenues: 0,
-      expenses: 0,
-    })
-  }
-
-  return months
 }
 
 function StatCard({
@@ -174,29 +145,6 @@ export default function Dashboard() {
     }
   }, [currency, confirmedRevenues, confirmedExpenses, data.projects])
 
-  const months = useMemo(() => {
-    const points = getLastMonths(6)
-    const byKey = new Map(points.map((point) => [point.key, point]))
-
-    confirmedRevenues
-      .filter((item) => item.currency === currency)
-      .forEach((item) => {
-        const point = byKey.get(getMonthKey(item.received_date))
-        if (point) point.revenues += Number(item.amount)
-      })
-
-    confirmedExpenses
-      .filter((item) => item.currency === currency)
-      .forEach((item) => {
-        const point = byKey.get(getMonthKey(item.expense_date))
-        if (point) point.expenses += Number(item.amount)
-      })
-
-    return points
-  }, [currency, confirmedRevenues, confirmedExpenses])
-
-  const maxMonthValue = Math.max(1, ...months.flatMap((month) => [month.revenues, month.expenses]))
-
   const projectSummary = useMemo(() => {
     return data.projects
       .map((project) => {
@@ -300,30 +248,11 @@ export default function Dashboard() {
                   <div className="fp-card-header">
                     <div>
                       <h2 className="fp-card-title">Évolution financière</h2>
-                      <p className="fp-card-description">Recettes et dépenses des six derniers mois · {currency}</p>
+                      <p className="fp-card-description">Recettes, dépenses et solde mois par mois · {currency}</p>
                     </div>
                   </div>
                   <div className="fp-card-body">
-                    <div className="flex h-64 items-end gap-2 sm:gap-4">
-                      {months.map((month) => {
-                        const revenueHeight = month.revenues > 0 ? Math.max(5, (month.revenues / maxMonthValue) * 100) : 2
-                        const expenseHeight = month.expenses > 0 ? Math.max(5, (month.expenses / maxMonthValue) * 100) : 2
-
-                        return (
-                          <div key={month.key} className="flex h-full min-w-0 flex-1 flex-col justify-end">
-                            <div className="flex min-h-0 flex-1 items-end justify-center gap-1 sm:gap-2">
-                              <div className="w-full max-w-7 rounded-t-md bg-emerald-500/80 transition-all" style={{ height: `${revenueHeight}%` }} title={`Recettes : ${formatAmount(month.revenues, currency)}`} />
-                              <div className="w-full max-w-7 rounded-t-md bg-red-400/80 transition-all" style={{ height: `${expenseHeight}%` }} title={`Dépenses : ${formatAmount(month.expenses, currency)}`} />
-                            </div>
-                            <div className="mt-3 text-center text-[11px] font-medium text-slate-400">{month.label}</div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                    <div className="mt-4 flex items-center justify-center gap-5 text-xs text-slate-500">
-                      <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-emerald-500" />Recettes</span>
-                      <span className="flex items-center gap-2"><span className="h-2 w-2 rounded-full bg-red-400" />Dépenses</span>
-                    </div>
+                    <FinancialChart revenues={confirmedRevenues} expenses={confirmedExpenses} currency={currency} />
                   </div>
                 </section>
 
