@@ -130,13 +130,13 @@ export function isAuthenticated(): boolean {
   return Boolean(localStorage.getItem('ong_finance_pro_token'))
 }
 
-export async function requestPasswordResetCode(phone: string): Promise<{ message: string }> {
-  const { data } = await api.post('/auth/forgot-password', { phone })
+export async function requestPasswordResetCode(email: string): Promise<{ message: string }> {
+  const { data } = await api.post('/auth/forgot-password', { email })
   return data
 }
 
 export async function resetPassword(payload: {
-  phone: string
+  email: string
   code: string
   password: string
   password_confirmation: string

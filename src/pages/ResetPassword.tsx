@@ -5,7 +5,7 @@ import { resetPassword } from '../services/auth'
 export default function ResetPassword() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [phone, setPhone] = useState(searchParams.get('phone') ?? '')
+  const [email, setEmail] = useState(searchParams.get('email') ?? '')
   const [code, setCode] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
@@ -18,7 +18,7 @@ export default function ResetPassword() {
     setError(null)
     setLoading(true)
     try {
-      await resetPassword({ phone, code, password, password_confirmation: passwordConfirmation })
+      await resetPassword({ email: email.trim(), code: code.trim(), password, password_confirmation: passwordConfirmation })
       setSuccess(true)
       setTimeout(() => navigate('/login'), 2000)
     } catch (err: any) {
@@ -33,7 +33,7 @@ export default function ResetPassword() {
       <div className="w-full max-w-sm bg-white rounded-xl shadow-sm border border-slate-200 p-8">
         <h1 className="text-xl font-semibold text-center mb-1">Nouveau mot de passe</h1>
         <p className="text-sm text-slate-500 text-center mb-6">
-          Saisissez le code reçu par SMS et votre nouveau mot de passe.
+          Saisissez le code reçu par email et votre nouveau mot de passe.
         </p>
 
         {error && <div className="mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">{error}</div>}
@@ -45,15 +45,16 @@ export default function ResetPassword() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Numéro de téléphone</label>
-              <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+              <label className="block text-sm font-medium text-slate-700 mb-1">Adresse email</label>
+              <input type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Code reçu par SMS</label>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Code reçu par email</label>
               <input
                 required
-                autoFocus
+                autoFocus={Boolean(email)}
                 inputMode="numeric"
+                maxLength={6}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 placeholder="••••••"
