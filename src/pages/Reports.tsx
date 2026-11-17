@@ -49,7 +49,7 @@ export default function Reports() {
             <label className="text-xs font-medium text-slate-500">Au<input type="date" value={to} onChange={e => setTo(e.target.value)} className="mt-1 block rounded-lg border border-slate-200 px-2.5 py-2 text-sm"/></label>
             <button onClick={load} disabled={loading} className="flex h-10 items-center gap-2 rounded-lg bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"><RefreshCw size={15} className={loading ? 'animate-spin' : ''}/> Actualiser</button>
             <button onClick={handleExport} disabled={exporting || !report} className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"><Download size={15}/> {exporting ? 'Export...' : 'Exporter (CSV)'}</button>
-            <Link to={`/financial-statements?from=${from}&to=${to}`} className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"><ScrollText size={15}/> États financiers SYSCOHADA</Link>
+            <Link to={`/financial-statements?from=${from}&to=${to}`} className="flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"><ScrollText size={15}/> États financiers SYCEBNL</Link>
           </div>
         </div>
 
